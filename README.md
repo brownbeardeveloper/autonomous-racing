@@ -14,6 +14,8 @@ flowchart LR
     pursuit --> mux
     teleop[keyboard_teleop_node] --> mux
     mux -->|drive_cmd| safety[safety_node]
+    lidar -->|scan| safety
+    rf2o -->|odom| safety
     remote([Laptop e-stop]) -->|UDP| bridge[estop_bridge_node]
     bridge -->|estop| safety
     safety -->|"/drive"| esp([ESP32])
@@ -195,7 +197,7 @@ Keys: `r` allows driving, `space` stops, `q` stops and quits.
 colcon test && colcon test-result --verbose
 ```
 
-122 tests, `ament_flake8` included. Third-party packages are skipped, see
+134 tests, `ament_flake8` included. Third-party packages are skipped, see
 `colcon_defaults.yaml`.
 
 ## License
