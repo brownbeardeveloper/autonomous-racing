@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>rc_localization</name>
+  <version>0.0.1</version>
+  <description>Localization for the RC racing stack: a particle filter on a saved track map, and slam_toolbox to build the map</description>
+  <maintainer email="bjorn.bergstr@outlook.com">Björn Bergström</maintainer>
+  <license>MIT</license>
+  <!-- vendor/range_libc -->
+  <license>Apache-2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>python3-numpy</depend>
+  <!-- Imported by RangeLibc, not by our own code. -->
+  <depend>python-transforms3d-pip</depend>
+  <!-- range_libc itself (vendor/range_libc) is a Cython extension, not a rosdep
+       package: build it once with pip, see README.md. -->
+
+  <exec_depend>nav2_map_server</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
+  <exec_depend>slam_toolbox</exec_depend>
+  <exec_depend>rc_maps</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

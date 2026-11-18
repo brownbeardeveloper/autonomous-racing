@@ -1,0 +1,26 @@
+# colcon
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.venv/
+
+# RangeLibc build output: pip regenerates both from RangeLibc.pyx
+src/rc_localization/vendor/range_libc/pywrapper/RangeLibc.cpp
+*.so
+
+# ros2 bag recordings
+bags/
+
+# third-party source trees, see README
+src/f1tenth_simulator/
+src/rf2o_laser_odometry/
+src/urg_node2/
+
+# Claude Code
+.claude/

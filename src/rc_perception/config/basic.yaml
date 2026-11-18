@@ -1,0 +1,4 @@
+/**/scan_filter_node:
+  ros__parameters:
+    scan_topic: scan
+    filtered_topic: scan_filtered

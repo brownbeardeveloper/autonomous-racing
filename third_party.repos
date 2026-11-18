@@ -1,0 +1,24 @@
+# Third-party sources, at the commits patches/ was made against:
+#   vcs import --recursive src < third_party.repos
+repositories:
+  urg_node2:
+    type: git
+    url: https://github.com/Hokuyo-aut/urg_node2.git
+    version: f02d8af22db2a4322217f4c5803494f4ca2903ff
+  rf2o_laser_odometry:
+    type: git
+    url: https://github.com/MAPIRlab/rf2o_laser_odometry.git
+    version: b38c68e46387b98845ecbfeb6660292f967a00d3
+  # The simulator; the car needs none of these.
+  f1tenth_simulator/gym:
+    type: git
+    url: https://github.com/openai/gym.git
+    version: 0.19.0
+  f1tenth_simulator/f1tenth_gym:
+    type: git
+    url: https://github.com/f1tenth/f1tenth_gym.git
+    version: 4fdb9c7e6fb7c701290f4dc18377d07c1681724f
+  f1tenth_simulator/f1tenth_gym_ros:
+    type: git
+    url: https://github.com/f1tenth/f1tenth_gym_ros.git
+    version: 883394df0964c555ee05bea69c3002daf6f2d405

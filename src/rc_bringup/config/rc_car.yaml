@@ -1,0 +1,45 @@
+# Per-car parameters for the physical Traxxas, loaded by car.launch.py after
+# each package's own basic.yaml. Only facts about this car belong here; the
+# dimensions are measured and match rc_description's URDF.
+#
+# Topics are namespace-relative, so they follow the `namespace` launch argument
+# (/rc_car/scan, /rc_car/odom). odom comes from rf2o: the car has no encoders.
+
+/**/urg_node2_node:
+  ros__parameters:
+    # +-125 deg of the lidar's +-135. Beyond +-129 deg every beam hits this
+    # car's own body 8-12 cm away (same edge in four bags, 2026-11-06 and -08).
+    # A body that rides along reads as an obstacle at zero distance to
+    # safety_node and as "not moving" to rf2o, so the lidar never measures it.
+    angle_min: -2.1817
+    angle_max: 2.1817
+
+/**/scan_filter_node:
+  ros__parameters:
+    scan_topic: scan
+
+/**/safety_node:
+  ros__parameters:
+    scan_topic: scan
+    odom_topic: odom
+    drive_topic: /drive              # absolute: the firmware subscribes to exactly this
+    # The car around its rear axle, as in the URDF: 56 x 30 cm.
+    wheelbase: 0.33                  # [m]
+    laser_x: 0.285                   # [m] lidar ahead of the rear axle
+    body_front: 0.425                # [m] front bumper ahead of the rear axle
+    body_rear: 0.135                 # [m] rear bumper behind it
+    body_half_width: 0.15            # [m]
+    # How early this car has to start braking. An estimate until the stopping
+    # distance is measured: latency + v / (2 * decel) at top speed, plus margin.
+    ttc_threshold: 0.5
+
+/**/follow_node:
+  ros__parameters:
+    wheelbase: 0.33                  # [m]
+    laser_x: 0.285                   # [m] lidar ahead of the rear axle
+
+/**/pure_pursuit_node:
+  ros__parameters:
+    odom_topic: odom
+    wheelbase: 0.33                  # [m]
+    max_steering_angle: 0.36         # [rad] the servo's mechanical limit

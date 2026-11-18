@@ -1,0 +1,24 @@
+# Only what differs from slam_toolbox's own defaults. The frames come from
+# mapping.launch.py, computed from the namespace like localization's.
+/**/slam_toolbox:
+  ros__parameters:
+    mode: mapping
+    # The raw scan, never scan_filtered: a NaN filled in to range_max would be
+    # mapped as a wall at range_max.
+    scan_topic: scan
+    map_name: map               # relative so it lands in the namespace; the default is /map
+    max_laser_range: 9.5        # just under the UST-10LX's 10 m, so max-range returns aren't walls
+    # A scan waits here until odom->base_link exists at its stamp. rf2o stamps
+    # that TF with the scan it matched, 35-430 ms after the scan arrives, while
+    # the lidar sends a new one every 25 ms. The default queue of 1 therefore
+    # drops every scan and no map is ever built. 20 scans = 0.5 s at 40 Hz.
+    scan_queue_size: 20
+    # [s] Each update re-renders the whole map from every scan so far, so it
+    # costs more the longer the session runs.
+    map_update_interval: 5.0
+    # Loop closure is what stops each lap being drawn as a fresh, drifted copy.
+    # It only looks for an earlier pass within loop_search_maximum_distance and
+    # can correct at most half of loop_search_space_dimension, so the two move
+    # together. Defaults 3.0 and 8.0.
+    loop_search_maximum_distance: 5.0
+    loop_search_space_dimension: 10.0

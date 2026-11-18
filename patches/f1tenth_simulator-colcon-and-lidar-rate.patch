@@ -1,0 +1,129 @@
+Build the F1TENTH simulator with colcon, and scan at the lidar's rate.
+
+- gym: a version specifier that newer setuptools rejects.
+- f1tenth_gym: list its packages, so a regular (non-editable) install,
+  which is what colcon does, contains f110_gym.
+- f1tenth_gym_ros: optional scan_range_min, scan_range_max, scan_rate_hz
+  and odom_tf_rate_hz. The defaults keep upstream's behaviour, 1080-beam
+  scans at 250 Hz; rc_sim sets the UST-10LX's 40 Hz and 10 m, and odometry
+  at the 100 Hz physics step.
+
+Upstream: https://github.com/openai/gym at 0.19.0
+          https://github.com/f1tenth/f1tenth_gym at 4fdb9c7
+          https://github.com/f1tenth/f1tenth_gym_ros at 883394d
+License:  MIT, as all three
+
+diff -ruN a/f1tenth_gym/setup.py b/f1tenth_gym/setup.py
+--- a/f1tenth_gym/setup.py	2026-11-18 14:17:26.307237010 +0100
++++ b/f1tenth_gym/setup.py	2026-11-18 14:17:32.263573243 +0100
+@@ -1,4 +1,4 @@
+-from setuptools import setup
++from setuptools import find_packages, setup
+ 
+ setup(name='f110_gym',
+       version='0.2.1',
+@@ -6,6 +6,7 @@
+       author_email='billyzheng.bz@gmail.com',
+       url='https://f1tenth.org',
+       package_dir={'': 'gym'},
++      packages=find_packages('gym'),
+       install_requires=['gym==0.19.0',
+ 		        'numpy<=1.22.0,>=1.18.0',
+                         'Pillow>=9.0.1',
+diff -ruN a/f1tenth_gym_ros/f1tenth_gym_ros/gym_bridge.py b/f1tenth_gym_ros/f1tenth_gym_ros/gym_bridge.py
+--- a/f1tenth_gym_ros/f1tenth_gym_ros/gym_bridge.py	2026-11-18 14:17:26.307237010 +0100
++++ b/f1tenth_gym_ros/f1tenth_gym_ros/gym_bridge.py	2026-11-18 14:17:52.036673439 +0100
+@@ -55,6 +55,11 @@
+         self.declare_parameter('scan_distance_to_base_link')
+         self.declare_parameter('scan_fov')
+         self.declare_parameter('scan_beams')
++        # Optional; the defaults are the fixed values these replace.
++        self.declare_parameter('scan_range_min', 0.)
++        self.declare_parameter('scan_range_max', 30.)
++        self.declare_parameter('scan_rate_hz', 250.)
++        self.declare_parameter('odom_tf_rate_hz', 250.)
+         self.declare_parameter('map_path')
+         self.declare_parameter('map_img_ext')
+         self.declare_parameter('num_agent')
+@@ -96,6 +101,8 @@
+         self.angle_min = -scan_fov / 2.
+         self.angle_max = scan_fov / 2.
+         self.angle_inc = scan_fov / scan_beams
++        self.scan_range_min = self.get_parameter('scan_range_min').value
++        self.scan_range_max = self.get_parameter('scan_range_max').value
+         self.ego_namespace = self.get_parameter('ego_namespace').value
+         ego_odom_topic = self.ego_namespace + '/' + self.get_parameter('ego_odom_topic').value
+         self.scan_distance_to_base_link = self.get_parameter('scan_distance_to_base_link').value
+@@ -128,8 +135,11 @@
+ 
+         # sim physical step timer
+         self.drive_timer = self.create_timer(0.01, self.drive_timer_callback)
+-        # topic publishing timer
+-        self.timer = self.create_timer(0.004, self.timer_callback)
++        # topic publishing timers: odometry and tf, and the scan at the lidar's own rate
++        self.timer = self.create_timer(
++            1.0 / self.get_parameter('odom_tf_rate_hz').value, self.timer_callback)
++        self.scan_timer = self.create_timer(
++            1.0 / self.get_parameter('scan_rate_hz').value, self.scan_timer_callback)
+ 
+         # transform broadcaster
+         self.br = TransformBroadcaster(self)
+@@ -236,6 +246,15 @@
+     def timer_callback(self):
+         ts = self.get_clock().now().to_msg()
+ 
++        # pub tf
++        self._publish_odom(ts)
++        self._publish_transforms(ts)
++        self._publish_laser_transforms(ts)
++        self._publish_wheel_transforms(ts)
++
++    def scan_timer_callback(self):
++        ts = self.get_clock().now().to_msg()
++
+         # pub scans
+         scan = LaserScan()
+         scan.header.stamp = ts
+@@ -243,8 +262,8 @@
+         scan.angle_min = self.angle_min
+         scan.angle_max = self.angle_max
+         scan.angle_increment = self.angle_inc
+-        scan.range_min = 0.
+-        scan.range_max = 30.
++        scan.range_min = self.scan_range_min
++        scan.range_max = self.scan_range_max
+         scan.ranges = self.ego_scan
+         self.ego_scan_pub.publish(scan)
+ 
+@@ -255,17 +274,11 @@
+             opp_scan.angle_min = self.angle_min
+             opp_scan.angle_max = self.angle_max
+             opp_scan.angle_increment = self.angle_inc
+-            opp_scan.range_min = 0.
+-            opp_scan.range_max = 30.
++            opp_scan.range_min = self.scan_range_min
++            opp_scan.range_max = self.scan_range_max
+             opp_scan.ranges = self.opp_scan
+             self.opp_scan_pub.publish(opp_scan)
+ 
+-        # pub tf
+-        self._publish_odom(ts)
+-        self._publish_transforms(ts)
+-        self._publish_laser_transforms(ts)
+-        self._publish_wheel_transforms(ts)
+-
+     def _update_sim_state(self):
+         self.ego_scan = list(self.obs['scans'][0])
+         if self.has_opp:
+diff -ruN a/gym/setup.py b/gym/setup.py
+--- a/gym/setup.py	2026-11-18 14:17:26.303236783 +0100
++++ b/gym/setup.py	2026-11-18 14:17:29.259403942 +0100
+@@ -9,7 +9,7 @@
+ 
+ # Environment-specific dependencies.
+ extras = {
+-    "atari": ["atari-py==0.2.6", "opencv-python>=3."],
++    "atari": ["atari-py==0.2.6", "opencv-python>=3.0"],
+     "box2d": ["box2d-py~=2.3.5", "pyglet>=1.4.0"],
+     "classic_control": ["pyglet>=1.4.0"],
+     "mujoco": ["mujoco_py>=1.50, <2.0", "imageio"],

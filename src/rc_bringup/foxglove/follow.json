@@ -1,0 +1,188 @@
+{
+  "configById": {
+    "3D!follow": {
+      "foxglovePanelTitle": "Follow mode: what it sees and where it steers",
+      "followTf": "rc_car/base_link",
+      "followMode": "follow-pose",
+      "cameraState": {
+        "perspective": false,
+        "distance": 7,
+        "phi": 0,
+        "thetaOffset": 90,
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          1.2,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "fovy": 45,
+        "near": 0.01,
+        "far": 100
+      },
+      "scene": {
+        "transforms": {
+          "showLabel": false,
+          "axisScale": 0.3,
+          "lineWidth": 0
+        }
+      },
+      "topics": {
+        "/rc_car/scan_filtered": {
+          "visible": true,
+          "colorMode": "flat",
+          "flatColor": "#d8d8d8ff",
+          "pointSize": 3
+        },
+        "/rc_car/follow_node/markers": {
+          "visible": true,
+          "namespaces": {
+            "lane": {
+              "visible": false
+            },
+            "clear_distance": {
+              "visible": false
+            }
+          }
+        },
+        "/rc_car/follow_node/target": {
+          "visible": false
+        },
+        "/rc_car/map": {
+          "visible": true
+        }
+      },
+      "layers": {
+        "grid": {
+          "visible": true,
+          "frameLocked": true,
+          "label": "1 m grid",
+          "instanceId": "grid",
+          "layerId": "foxglove.Grid",
+          "frameId": "rc_car/base_link",
+          "size": 10,
+          "divisions": 10,
+          "lineWidth": 1,
+          "color": "#ffffff26",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "order": 1
+        },
+        "car": {
+          "visible": true,
+          "frameLocked": true,
+          "label": "Car",
+          "instanceId": "car",
+          "layerId": "foxglove.Urdf",
+          "sourceType": "topic",
+          "topic": "/rc_car/robot_description",
+          "framePrefix": "",
+          "displayMode": "auto",
+          "fallbackColor": "#ffffff",
+          "order": 2
+        }
+      }
+    },
+    "StateTransitions!behavior": {
+      "foxglovePanelTitle": "Wall or gap",
+      "paths": [
+        {
+          "value": "/rc_car/follow_node/behavior.data",
+          "label": "follow behavior",
+          "timestampMethod": "receiveTime"
+        }
+      ],
+      "isSynced": true
+    },
+    "Plot!drive": {
+      "foxglovePanelTitle": "Speed [m/s] and steering [rad]",
+      "paths": [
+        {
+          "value": "/rc_car/follow/drive.drive.speed",
+          "label": "follow speed",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "/drive.drive.speed",
+          "label": "speed after safety",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        },
+        {
+          "value": "/rc_car/follow/drive.drive.steering_angle",
+          "label": "steering, + is left",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        }
+      ],
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": true,
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "followingViewWidth": 20,
+      "sidebarDimension": 240
+    },
+    "RosOut!log": {
+      "foxglovePanelTitle": "follow_node log",
+      "searchTerms": [
+        "follow_node"
+      ],
+      "minLogLevel": 2
+    },
+    "DiagnosticSummary!jetson": {
+      "foxglovePanelTitle": "Jetson health",
+      "topicToRender": "/diagnostics",
+      "hardwareIdFilter": "",
+      "pinnedIds": [],
+      "minLevel": 0,
+      "sortByLevel": true
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "direction": "row",
+    "first": "3D!follow",
+    "second": {
+      "direction": "column",
+      "first": "StateTransitions!behavior",
+      "second": {
+        "direction": "column",
+        "first": "Plot!drive",
+        "second": {
+          "direction": "row",
+          "first": "RosOut!log",
+          "second": "DiagnosticSummary!jetson",
+          "splitPercentage": 50
+        },
+        "splitPercentage": 60
+      },
+      "splitPercentage": 25
+    },
+    "splitPercentage": 62
+  }
+}

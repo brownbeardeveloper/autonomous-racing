@@ -1,0 +1,32 @@
+# Per-car parameters for the f1tenth_gym simulator, loaded by sim.launch.py
+# after each package's own basic.yaml. Only facts about the car belong here:
+# topics, dimensions, mounting offsets. Tuning stays in each package.
+
+/**/safety_node:
+  ros__parameters:
+    odom_topic: /ego_racecar/odom   # from the gym bridge
+    drive_topic: /drive             # what the gym bridge subscribes to
+    # The gym's collision box, 58 x 31 cm, centred on its lidar.
+    wheelbase: 0.33                 # [m]
+    laser_x: 0.0
+    body_front: 0.29                # [m]
+    body_rear: 0.29                 # [m]
+    body_half_width: 0.155          # [m]
+
+/**/follow_node:
+  ros__parameters:
+    wheelbase: 0.33                 # [m]
+    laser_x: 0.0                    # the gym puts the lidar on the rear axle
+
+/**/pure_pursuit_node:
+  ros__parameters:
+    odom_topic: /ego_racecar/odom
+    # The gym stamps this odometry in the map frame (ground truth), so the pose
+    # is read straight off the message. On the real car TF is the source.
+    use_tf: false
+    wheelbase: 0.33                 # [m]
+    max_steering_angle: 0.36        # [rad]
+
+/**/jetson_monitor_node:
+  ros__parameters:
+    odom_topic: /ego_racecar/odom

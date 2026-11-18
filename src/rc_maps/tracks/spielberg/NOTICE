@@ -1,0 +1,9 @@
+The Spielberg track is not this project's own work, and not MIT licensed.
+
+map.png and map.yaml come from f1tenth_racetracks
+(https://github.com/f1tenth/f1tenth_racetracks), which is GPL-3.0 licensed.
+racingline.csv is computed from them. All three are GPL-3.0; the full text
+is LICENSES/GPL-3.0.txt at the root of this repository.
+
+Track data © OpenStreetMap contributors, ODbL 1.0
+(https://www.openstreetmap.org/copyright).

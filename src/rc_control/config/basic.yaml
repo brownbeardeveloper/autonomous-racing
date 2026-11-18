@@ -1,0 +1,69 @@
+/**/pure_pursuit_node:
+  ros__parameters:
+    # A raceline CSV, read as a closed loop: TUM global_racetrajectory_optimization
+    # output or a plain "x,y,v" file, e.g. a lap recorded in follow mode. The
+    # launch files set it from map:=<track>. Empty: the node stays stopped.
+    waypoints_file: ""
+    odom_topic: odom
+    drive_topic: pure_pursuit/drive
+
+    # The car's geometry; the car_config overlay overrides it per car.
+    wheelbase: 0.33
+    max_steering_angle: 0.36
+
+    # The lookahead grows with speed, so the car neither cuts corners at speed
+    # nor hunts for a target when nearly stopped.
+    lookahead_distance: 2.0   # [m] at standstill
+    lookahead_gain: 0.3       # [m] more per m/s
+    lookahead_min: 0.5
+    lookahead_max: 3.0
+
+    # speed_gain scales the raceline's own speed profile, e.g. down for a first
+    # run on the car. max_speed caps it: a planning number, so the braking pass
+    # aims at a speed the car can reach. The firmware owns the actuator limit.
+    speed_gain: 8.0
+    max_speed: 8.0
+
+    # Farther from the path than this, the car stops instead of steering back.
+    max_path_error: 2.0
+
+    publish_debug: true
+
+/**/follow_node:
+  ros__parameters:
+    scan_topic: scan_filtered
+    drive_topic: follow/drive
+
+    fov_deg: 180.0          # where follow-the-gap may aim
+    max_range: 3.0
+    half_width: 0.25        # half the car's width plus margin
+
+    wall_side: left         # left | right
+    wall_distance: 1.5
+    lookahead: 2.0
+    clear_distance: 1.5     # lane free this far: follow the wall, else follow the gap
+
+    stop_distance: 0.5      # lidar to bumper (0.14) plus margin
+    max_decel: 2.0
+    max_lateral_accel: 3.0
+    max_speed: 2.0
+
+    publish_debug: true
+
+# The start mode comes from the launch file (drive_mode), not from here.
+/**/drive_mux_node:
+  ros__parameters:
+    drive_cmd_topic: drive_cmd
+    behavior_mode_topic: behavior_mode
+    follow_drive_topic: follow/drive
+    pure_pursuit_drive_topic: pure_pursuit/drive
+    keyboard_teleop_drive_topic: keyboard_teleop/drive
+
+/**/keyboard_teleop_node:
+  ros__parameters:
+    drive_topic: keyboard_teleop/drive
+    poll_rate: 50.0
+    steer_ramp_rate: 3.0
+    throttle_ramp_rate: 3.0
+    max_steering_angle: 0.36
+    max_speed: 2.0

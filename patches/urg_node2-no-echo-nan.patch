@@ -1,0 +1,30 @@
+Publish the UST-10LX's "no echo" as NaN, not as a 65.533 m range.
+
+The lidar reports no echo as 65533 mm, and upstream publishes that as a
+range. It never changes as the car moves, so scan matching reads it as
+"not moving": rf2o failed on 30 % of the scans outdoors. NaN means "no
+return" to every consumer in this stack.
+
+Upstream: https://github.com/Hokuyo-aut/urg_node2 at f02d8af
+License:  Apache-2.0, as urg_node2
+
+diff --git a/src/urg_node2.cpp b/src/urg_node2.cpp
+index 36e3214..f7d0cf1 100644
+--- a/src/urg_node2.cpp
++++ b/src/urg_node2.cpp
+@@ -569,8 +569,13 @@ bool UrgNode2::create_scan_message(sensor_msgs::msg::LaserScan & msg)
+   }
+ 
+   for (int i = 0; i < num_beams; i++) {
+-    if (distance_[i] != 0) {
+-      msg.ranges[i] = static_cast<float>(distance_[i]) / 1000.0;
++    const float range = static_cast<float>(distance_[i]) / 1000.0;
++    // A reading past the sensor's own maximum is an error code, not a
++    // distance: the UST-10LX sends 65533 for "no echo". Published as 65.533 m
++    // it is a finite range that never changes, which scan matching reads as
++    // "not moving" - a run of them makes rf2o divide by zero.
++    if (distance_[i] != 0 && range <= msg.range_max) {
++      msg.ranges[i] = range;
+       if (use_intensity_) {
+         msg.intensities[i] = intensity_[i];
+       }

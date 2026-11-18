@@ -1,0 +1,61 @@
+Publish nothing when an odometry estimate fails.
+
+Upstream publishes the previous pose, stamp and speed again when a scan
+gives no estimate, which arrives looking like fresh odometry. Silent, the
+failure reaches safety_node as stale odometry, and it brakes. A scan with
+too few valid ranges counts as a failed estimate.
+
+Upstream: https://github.com/MAPIRlab/rf2o_laser_odometry, branch ros2, at b38c68e
+License:  GPL-3.0, as rf2o_laser_odometry
+
+diff -ru a/src/CLaserOdometry2D.cpp b/src/CLaserOdometry2D.cpp
+--- a/src/CLaserOdometry2D.cpp	2026-11-15 20:34:17.474328813 +0100
++++ b/src/CLaserOdometry2D.cpp	2026-11-15 20:34:17.478329486 +0100
+@@ -256,19 +256,16 @@
+       solveSystemNonLinear();
+       //solveSystemOneLevel();    //without robust-function
+     }
+-    else
+-    {
+-      /// @todo At initialization something
+-      /// isn't properly initialized so that
+-      /// uninitialized values get propagated
+-      /// from 'filterLevelSolution' first call
+-      /// Throughout the whole execution. Thus
+-      /// this 'continue' that surprisingly works.
+-      continue;
+-    }
+ 
+     // 8. Filter solution
+-    if (!filterLevelSolution()) return false;
++    // A scan with too few valid ranges, or one the filter rejects, has no
++    // estimate - reporting "did not move" for it would be a guess. The next
++    // scan is matched against this one, so the speed's time base moves on.
++    if (num_valid_range <= 3 || !filterLevelSolution())
++    {
++      last_odom_time = current_scan_time;
++      return false;
++    }
+   } // end pyramid lvls
+ 
+   // Get computation time 
+diff -ru a/src/CLaserOdometry2DNode.cpp b/src/CLaserOdometry2DNode.cpp
+--- a/src/CLaserOdometry2DNode.cpp	2026-11-15 20:34:17.474328813 +0100
++++ b/src/CLaserOdometry2DNode.cpp	2026-11-15 20:34:17.478329486 +0100
+@@ -164,11 +164,11 @@
+   // Do only run when a new scan is ready 
+   if( rf2o_ref.is_initialized() && scan_available() )
+   {
+-    // Process odometry estimation
+-    rf2o_ref.odometryCalculation(last_scan);
+-
+-    // Publish odometry over ROS2 (tf/topic)
+-    publish();
++    // A failed estimate leaves the previous pose, stamp and speed in place.
++    // Publishing those again would arrive looking like fresh odometry; staying
++    // silent is what lets safety_node's stale-odom brake see the failure.
++    if (rf2o_ref.odometryCalculation(last_scan))
++      publish();
+ 
+     // Do not run on the same data!
+     new_scan_available = false;

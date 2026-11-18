@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>rc_bringup</name>
+  <version>0.0.1</version>
+  <description>Launch files and per-car parameters that tie the rc_* packages together</description>
+  <maintainer email="bjorn.bergstr@outlook.com">Björn Bergström</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>rc_msgs</exec_depend>
+  <exec_depend>rc_description</exec_depend>
+  <exec_depend>rc_maps</exec_depend>
+  <exec_depend>rc_perception</exec_depend>
+  <exec_depend>rc_control</exec_depend>
+  <exec_depend>rc_safety</exec_depend>
+  <exec_depend>rc_monitor</exec_depend>
+  <exec_depend>rc_localization</exec_depend>
+  <exec_depend>rc_sim</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>foxglove_bridge</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>urg_node2</exec_depend>
+  <exec_depend>lifecycle_msgs</exec_depend>
+  <!-- Neither is a rosdep package: rf2o is built from src/, micro_ros_agent
+       in ~/microros_ws. See README.md. -->
+  <exec_depend>rf2o_laser_odometry</exec_depend>
+  <exec_depend>micro_ros_agent</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

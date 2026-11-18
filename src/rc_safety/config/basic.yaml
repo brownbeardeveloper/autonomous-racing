@@ -1,0 +1,36 @@
+# Both nodes' parameters are read-only while they run: edit here, or in the
+# car overlay (rc_bringup/config/), and relaunch.
+/**/safety_node:
+  ros__parameters:
+    scan_topic: scan
+    odom_topic: odom
+    drive_cmd_topic: drive_cmd
+    drive_topic: /drive     # absolute: the firmware and the sim subscribe to exactly this
+
+    ttc_threshold: 0.1      # [s] sim; rc_car.yaml raises it for the real car
+    ttc_release: 1.0        # [s] more margin to release than to brake
+    min_hold_s: 0.5         # [s] keeps the brake from chattering
+
+    # Time to collision is along the commanded steering arc, with the car's
+    # body (the car overlay) plus this margin.
+    margin: 0.05            # [m] covers the lidar's +-4 cm range error
+    min_beams: 5            # raise if scattered noisy echoes trigger it
+    min_speed: 0.3
+
+    odom_timeout_s: 0.5
+    brake_on_stale_odom: true
+    drive_cmd_timeout_s: 0.5
+    brake_on_stale_drive_cmd: true
+    scan_timeout_s: 0.5
+    use_estop: true
+    estop_timeout_s: 0.5
+    publish_debug: true
+
+/**/estop_bridge_node:
+  ros__parameters:
+    udp_port: 5005
+    timeout_s: 0.5
+    # The secret estop_remote.py must send, kept out of the repo. Without the
+    # file the bridge exits and the car stays stopped; "" accepts any sender
+    # (bench only).
+    token_file: "~/.config/rc_car/estop_token"

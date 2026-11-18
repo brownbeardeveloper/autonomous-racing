@@ -1,0 +1,12 @@
+# Read by colcon when run from this directory (colcon-defaults).
+#
+# The simulator's third-party packages are built but not tested: their suites
+# fail on upstream code style and on dependencies the sim never uses. None of
+# it ours, none of it affects the sim. urg_node2's suite talks to a lidar on
+# 192.168.0.10 and fails without one.
+test:
+  packages-skip:
+    - f110_gym
+    - gym
+    - f1tenth_gym_ros
+    - urg_node2
